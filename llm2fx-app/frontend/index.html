@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM2Fx - Audio Effects Processor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 20px;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .file-upload-label:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .file-upload-label.dragover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+            transform: scale(1.02);
+        }
+
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f4fd;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .fx-preview {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .fx-preview h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .fx-params {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .param-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .param-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .param-value {
+            font-size: 1.1em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 LLM2Fx</h1>
+            <p>AI-Powered Audio Effects Processing</p>
+        </div>
+
+        <div class="content">
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="audioFile">Audio File:</label>
+                    <div class="file-upload">
+                        <input type="file" id="audioFile" name="file" accept="audio/*" required>
+                        <label for="audioFile" class="file-upload-label">
+                            <div>📁 Click to upload or drag & drop audio file</div>
+                            <div style="font-size: 0.9em; margin-top: 5px; opacity: 0.7;">
+                                Supports: MP3, WAV, FLAC, M4A
+                            </div>
+                        </label>
+                    </div>
+                    <div class="file-info" id="fileInfo"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="instrument">Instrument Type:</label>
+                    <select id="instrument" name="instrument" required>
+                        <option value="">Select instrument...</option>
+                        <option value="vocal">Vocals</option>
+                        <option value="guitar">Guitar</option>
+                        <option value="bass">Bass</option>
+                        <option value="drums">Drums</option>
+                        <option value="piano">Piano</option>
+                        <option value="synth">Synthesizer</option>
+                        <option value="strings">Strings</option>
+                        <option value="brass">Brass</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="fxType">Effect Type:</label>
+                    <select id="fxType" name="fx_type" required>
+                        <option value="">Select effect...</option>
+                        <option value="reverb">Reverb</option>
+                        <option value="eq">Equalizer</option>
+                        <option value="compression">Compression</option>
+                        <option value="delay">Delay</option>
+                        <option value="chorus">Chorus</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="instruction">Mixing Instructions:</label>
+                    <textarea id="instruction" name="instruction" rows="4" 
+                              placeholder="Describe the sound you want (e.g., 'warm small room reverb', 'bright punchy drums', 'smooth vocal compression')" required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    🎛️ Process Audio with AI Effects
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your audio with AI effects...</p>
+            </div>
+
+            <div class="error" id="error"></div>
+            <div class="success" id="success"></div>
+
+            <div class="fx-preview" id="fxPreview">
+                <h3>🎛️ Generated Effects Parameters</h3>
+                <div class="fx-params" id="fxParams"></div>
+            </div>
+
+            <div class="result" id="result">
+                <h3>✅ Processing Complete!</h3>
+                <div class="result-item">
+                    <strong>Original File:</strong> <span id="originalFile"></span><br>
+                    <strong>Processed File:</strong> <span id="processedFile"></span><br>
+                    <a href="#" class="download-btn" id="downloadBtn">📥 Download Processed Audio</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // File upload handling
+        const fileInput = document.getElementById('audioFile');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileLabel = document.querySelector('.file-upload-label');
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileInfo.style.display = 'block';
+                fileInfo.innerHTML = `
+                    <strong>📁 ${file.name}</strong><br>
+                    Size: ${(file.size / 1024 / 1024).toFixed(2)} MB<br>
+                    Type: ${file.type}
+                `;
+            } else {
+                fileInfo.style.display = 'none';
+            }
+        });
+
+        // Drag and drop functionality
+        fileLabel.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        fileLabel.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+
+        fileLabel.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const success = document.getElementById('success');
+            const result = document.getElementById('result');
+            const fxPreview = document.getElementById('fxPreview');
+
+            // Reset UI
+            error.style.display = 'none';
+            success.style.display = 'none';
+            result.style.display = 'none';
+            fxPreview.style.display = 'none';
+            
+            // Show loading
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                formData.append('instrument', document.getElementById('instrument').value);
+                formData.append('fx_type', document.getElementById('fxType').value);
+                formData.append('instruction', document.getElementById('instruction').value);
+
+                // First, get the effects parameters from the LLM
+                const fxResponse = await fetch('/text2fx', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        instrument: document.getElementById('instrument').value,
+                        fx_type: document.getElementById('fxType').value,
+                        instruction: document.getElementById('instruction').value
+                    })
+                });
+
+                if (!fxResponse.ok) {
+                    throw new Error(`Effects API error: ${fxResponse.status}`);
+                }
+
+                const fxData = await fxResponse.json();
+                
+                // Display effects parameters
+                displayEffectsPreview(fxData);
+
+                // Now process the audio file
+                const processResponse = await fetch('/process-audio', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!processResponse.ok) {
+                    throw new Error(`Processing error: ${processResponse.status}`);
+                }
+
+                const blob = await processResponse.blob();
+                const url = window.URL.createObjectURL(blob);
+
+                // Update result display
+                document.getElementById('originalFile').textContent = fileInput.files[0].name;
+                document.getElementById('processedFile').textContent = `processed_${fileInput.files[0].name}`;
+                
+                const downloadBtn = document.getElementById('downloadBtn');
+                downloadBtn.href = url;
+                downloadBtn.download = `processed_${fileInput.files[0].name}`;
+
+                result.style.display = 'block';
+                success.style.display = 'block';
+                success.textContent = 'Audio processed successfully!';
+
+            } catch (err) {
+                error.style.display = 'block';
+                error.textContent = `Error: ${err.message}`;
+            } finally {
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        function displayEffectsPreview(fxData) {
+            const fxPreview = document.getElementById('fxPreview');
+            const fxParams = document.getElementById('fxParams');
+            
+            fxParams.innerHTML = '';
+
+            if (fxData.reverb) {
+                // Display reverb parameters
+                const gains = fxData.reverb.gains_db;
+                const decays = fxData.reverb.decays_s;
+                const mix = fxData.reverb.mix;
+
+                // Create frequency bands display
+                const bands = ['20Hz', '50Hz', '100Hz', '200Hz', '400Hz', '800Hz', '1.5kHz', '3kHz', '6kHz', '12kHz', '16kHz', '20kHz'];
+                
+                gains.forEach((gain, i) => {
+                    const paramItem = document.createElement('div');
+                    paramItem.className = 'param-item';
+                    paramItem.innerHTML = `
+                        <div class="param-label">${bands[i]} Band</div>
+                        <div class="param-value">Gain: ${gain.toFixed(1)}dB | Decay: ${decays[i].toFixed(2)}s</div>
+                    `;
+                    fxParams.appendChild(paramItem);
+                });
+
+                // Add mix parameter
+                const mixItem = document.createElement('div');
+                mixItem.className = 'param-item';
+                mixItem.innerHTML = `
+                    <div class="param-label">Mix Level</div>
+                    <div class="param-value">${(mix * 100).toFixed(0)}%</div>
+                `;
+                fxParams.appendChild(mixItem);
+
+                // Add reasoning if available
+                if (fxData.reason) {
+                    const reasonItem = document.createElement('div');
+                    reasonItem.className = 'param-item';
+                    reasonItem.style.gridColumn = '1 / -1';
+                    reasonItem.innerHTML = `
+                        <div class="param-label">AI Reasoning</div>
+                        <div class="param-value">${fxData.reason}</div>
+                    `;
+                    fxParams.appendChild(reasonItem);
+                }
+            }
+
+            fxPreview.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

@@ -21,11 +21,11 @@ No text outside JSON. No comments. No trailing commas.
 FEWSHOTS = [
     # Keep tiny to save tokens
     ('intimate vocal, small room',
-     '{"schema_version":"reverb_v1","reverb":{"gains_db":[0,0,0,0,-1,-2,-2,-1,0,0,0,0],"decays_s":[0.8,0.8,0.8,0.8,0.9,1.0,1.0,1.0,0.9,0.9,0.8,0.8],"mix":0.20},"reason":"Small room, slight HF damp."}'),
+     '{"schema_version":"reverb_v1","reverb":{"gains_db":[2,2,1,1,0,-1,-1,0,1,1,2,2],"decays_s":[1.2,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2],"mix":0.6},"reason":"Small room, pronounced effect."}'),
     ('large hall pad, airy',
-     '{"schema_version":"reverb_v1","reverb":{"gains_db":[1,1,1,1,0,0,0,0,1,1,2,2],"decays_s":[2.2,2.2,2.4,2.5,2.6,2.8,3.0,3.2,3.3,3.4,3.6,3.8],"mix":0.45},"reason":"Long tail, bright top."}'),
+     '{"schema_version":"reverb_v1","reverb":{"gains_db":[3,3,2,2,1,1,1,1,2,2,3,3],"decays_s":[3.2,3.2,3.4,3.5,3.6,3.8,4.0,4.2,4.3,4.4,4.6,4.8],"mix":0.75},"reason":"Long tail, bright top, very airy."}'),
     ('tight drum room',
-     '{"schema_version":"reverb_v1","reverb":{"gains_db":[0,0,0,0,0,0,0,-1,-2,-2,-2,-2],"decays_s":[0.4,0.4,0.45,0.5,0.55,0.6,0.6,0.55,0.5,0.45,0.4,0.35],"mix":0.15},"reason":"Short decay, rolled highs."}')
+     '{"schema_version":"reverb_v1","reverb":{"gains_db":[1,1,1,0,0,0,-1,-2,-2,-2,-2,-2],"decays_s":[0.8,0.8,0.85,0.9,0.95,1.0,1.0,0.95,0.9,0.85,0.8,0.75],"mix":0.5},"reason":"Short decay, rolled highs, tight."}')
 ]
 
 def build_messages(fx_type: str, instruction: str, instrument: str) -> list[dict]:

@@ -6,25 +6,24 @@
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp env.example .env  # add your OPENAI_API_KEY
-bash run.sh
-# open: http://localhost:8000/docs
+cp .env.example .env  # add your OPENAI_API_KEY
+./start.sh
+# open: http://localhost:8000
+```
 
-API
-POST /text2fx
+## Frontend Features
+- 🎵 **Audio File Upload** - Drag & drop or click to upload
+- 🎛️ **Instrument Selection** - Choose from vocals, guitar, bass, drums, etc.
+- 🎚️ **Effect Types** - Reverb, EQ, Compression, Delay, Chorus
+- 📝 **Natural Language Instructions** - Describe the sound you want
+- 📊 **Real-time Effects Preview** - See AI-generated parameters
+- 📥 **Download Processed Audio** - Get your processed file
 
-Request:
-
-{"fx_type":"reverb","instrument":"vocal","instruction":"warm small room"}
-
-
-Response:
-
-{
-  "schema_version":"reverb_v1",
-  "reverb":{"gains_db":[...12...],"decays_s":[...12...],"mix":0.25},
-  "reason":"..."
-}
+## API Endpoints
+POST /text2fx - Generate effects parameters from text
+POST /process-audio - Upload and process audio files
+GET / - Frontend interface
+GET /healthz - Health check
 
 Design
 

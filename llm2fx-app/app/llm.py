@@ -1,6 +1,15 @@
 import json, httpx
+import os
 from .config import settings
 from .logger import logger
+
+# Fix SSL certificate issues on macOS
+try:
+    import certifi
+    os.environ['SSL_CERT_FILE'] = certifi.where()
+    os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
+except ImportError:
+    pass
 
 async def call_openai_chat(messages: list[dict], *, force_json: bool = True) -> str:
     """
